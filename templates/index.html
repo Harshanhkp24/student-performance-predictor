@@ -1,1 +1,735 @@
-<h1>Welcome to the Home Page</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Student Performance Predictor</title>
+    <style>
+        :root {
+            --bg: #f6efe5;
+            --panel: rgba(255, 252, 247, 0.88);
+            --panel-strong: #fffaf2;
+            --text: #1d1a17;
+            --muted: #655d53;
+            --accent: #d96c3f;
+            --accent-deep: #8f3d1f;
+            --accent-soft: #f7c9a6;
+            --line: rgba(29, 26, 23, 0.1);
+            --success: #275c45;
+            --shadow: 0 24px 70px rgba(88, 48, 29, 0.12);
+            --radius: 28px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", "Trebuchet MS", sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top left, rgba(250, 172, 96, 0.38), transparent 32%),
+                radial-gradient(circle at 85% 18%, rgba(145, 197, 178, 0.34), transparent 24%),
+                linear-gradient(180deg, #fcf7f0 0%, var(--bg) 45%, #f2e6d8 100%);
+            min-height: 100vh;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(29, 26, 23, 0.035) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(29, 26, 23, 0.035) 1px, transparent 1px);
+            background-size: 36px 36px;
+            mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.55), transparent 95%);
+            pointer-events: none;
+        }
+
+        .page {
+            position: relative;
+            width: min(1180px, calc(100% - 32px));
+            margin: 0 auto;
+            padding: 24px 0 56px;
+        }
+
+        .site-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 10px 0 24px;
+        }
+
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .brand-mark {
+            width: 42px;
+            height: 42px;
+            display: grid;
+            place-items: center;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--accent) 0%, #f0a14e 100%);
+            color: #fffdf8;
+            box-shadow: var(--shadow);
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a,
+        .hero-actions a,
+        .cta-card a {
+            text-decoration: none;
+        }
+
+        .pill-link,
+        .primary-link,
+        .ghost-link {
+            border-radius: 999px;
+            padding: 12px 18px;
+            font-weight: 600;
+            transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+        }
+
+        .pill-link {
+            color: var(--text);
+            background: rgba(255, 250, 242, 0.72);
+            border: 1px solid rgba(29, 26, 23, 0.08);
+        }
+
+        .primary-link {
+            color: #fffaf2;
+            background: linear-gradient(135deg, var(--accent-deep), var(--accent));
+            box-shadow: 0 16px 30px rgba(143, 61, 31, 0.2);
+        }
+
+        .ghost-link {
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.45);
+            border: 1px solid rgba(29, 26, 23, 0.09);
+        }
+
+        .pill-link:hover,
+        .primary-link:hover,
+        .ghost-link:hover {
+            transform: translateY(-2px);
+        }
+
+        .hero {
+            display: grid;
+            grid-template-columns: minmax(0, 1.25fr) minmax(290px, 0.75fr);
+            gap: 28px;
+            align-items: stretch;
+        }
+
+        .hero-copy,
+        .hero-card,
+        .section-card,
+        .cta-card {
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        .hero-copy {
+            padding: 38px;
+            background:
+                linear-gradient(145deg, rgba(255, 250, 242, 0.95), rgba(249, 233, 214, 0.88)),
+                var(--panel);
+            animation: fade-up 0.7s ease both;
+        }
+
+        .hero-kicker,
+        .section-kicker {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: rgba(217, 108, 63, 0.11);
+            color: var(--accent-deep);
+            font-size: 0.84rem;
+            font-weight: 700;
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+        }
+
+        .hero h1 {
+            margin: 20px 0 16px;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: clamp(2.5rem, 5vw, 4.6rem);
+            line-height: 0.95;
+            letter-spacing: -0.04em;
+        }
+
+        .hero p {
+            margin: 0;
+            max-width: 60ch;
+            color: var(--muted);
+            font-size: 1.02rem;
+            line-height: 1.75;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            margin-top: 28px;
+        }
+
+        .hero-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
+            margin-top: 28px;
+        }
+
+        .stat-chip {
+            padding: 16px;
+            border-radius: 22px;
+            background: rgba(255, 255, 255, 0.58);
+            border: 1px solid rgba(29, 26, 23, 0.07);
+        }
+
+        .stat-chip strong {
+            display: block;
+            font-size: 1.4rem;
+            margin-bottom: 6px;
+        }
+
+        .stat-chip span {
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        .hero-card {
+            padding: 28px;
+            background:
+                radial-gradient(circle at top right, rgba(247, 201, 166, 0.72), transparent 35%),
+                linear-gradient(180deg, rgba(255, 253, 248, 0.96), rgba(244, 235, 224, 0.94));
+            animation: fade-up 0.85s ease both;
+        }
+
+        .hero-card h2,
+        .section-head h2,
+        .cta-card h2 {
+            margin: 0 0 12px;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: clamp(1.7rem, 3vw, 2.2rem);
+            letter-spacing: -0.03em;
+        }
+
+        .hero-card p,
+        .section-head p,
+        .metric-copy,
+        .prediction-copy,
+        .footer-note {
+            color: var(--muted);
+            line-height: 1.7;
+        }
+
+        .metric-list {
+            display: grid;
+            gap: 14px;
+            margin-top: 22px;
+        }
+
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px dashed rgba(29, 26, 23, 0.13);
+        }
+
+        .metric-row:last-child {
+            border-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .metric-row span {
+            color: var(--muted);
+        }
+
+        .metric-row strong {
+            text-align: right;
+        }
+
+        .section {
+            margin-top: 28px;
+        }
+
+        .section-card {
+            padding: 30px;
+            background: var(--panel);
+            backdrop-filter: blur(14px);
+        }
+
+        .section-head {
+            display: flex;
+            align-items: end;
+            justify-content: space-between;
+            gap: 18px;
+            margin-bottom: 24px;
+        }
+
+        .section-head p {
+            max-width: 64ch;
+            margin: 0;
+        }
+
+        .overview-grid,
+        .workflow-grid,
+        .insight-grid,
+        .prediction-grid {
+            display: grid;
+            gap: 18px;
+        }
+
+        .overview-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .workflow-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .insight-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .prediction-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .card {
+            padding: 22px;
+            border-radius: 24px;
+            background: rgba(255, 255, 255, 0.65);
+            border: 1px solid rgba(29, 26, 23, 0.08);
+        }
+
+        .card h3,
+        .prediction-card h3 {
+            margin: 0 0 10px;
+            font-size: 1.08rem;
+        }
+
+        .card p,
+        .prediction-card p {
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.7;
+        }
+
+        .overview-card strong {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1.55rem;
+        }
+
+        .workflow-card {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .workflow-card::after {
+            content: "";
+            position: absolute;
+            inset: auto -36px -36px auto;
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(217, 108, 63, 0.16), transparent 72%);
+        }
+
+        .card-index {
+            display: inline-grid;
+            place-items: center;
+            width: 36px;
+            height: 36px;
+            margin-bottom: 12px;
+            border-radius: 12px;
+            background: rgba(39, 92, 69, 0.12);
+            color: var(--success);
+            font-weight: 700;
+        }
+
+        .candidate-wrap {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .candidate {
+            padding: 10px 14px;
+            border-radius: 999px;
+            background: rgba(255, 248, 240, 0.88);
+            border: 1px solid rgba(29, 26, 23, 0.08);
+            font-size: 0.93rem;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 16px;
+            margin-top: 22px;
+        }
+
+        .metric-card strong,
+        .prediction-card strong {
+            display: block;
+            font-size: 1.7rem;
+            margin-bottom: 8px;
+        }
+
+        .prediction-card {
+            padding: 24px;
+            border-radius: 26px;
+            background: linear-gradient(180deg, rgba(255, 253, 248, 0.96), rgba(248, 238, 225, 0.92));
+            border: 1px solid rgba(29, 26, 23, 0.08);
+        }
+
+        .prediction-meta {
+            display: grid;
+            gap: 8px;
+            margin-top: 16px;
+            font-size: 0.95rem;
+            color: var(--muted);
+        }
+
+        .prediction-value {
+            color: var(--accent-deep);
+        }
+
+        .cta-card {
+            margin-top: 28px;
+            padding: 34px;
+            background:
+                radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.22), transparent 32%),
+                linear-gradient(135deg, #2f6455, #173c31);
+            color: #f9f4ed;
+        }
+
+        .cta-card p {
+            color: rgba(249, 244, 237, 0.82);
+            margin: 0 0 18px;
+            max-width: 62ch;
+        }
+
+        .cta-card .primary-link {
+            display: inline-flex;
+            background: #f4b16f;
+            color: #24150d;
+            box-shadow: none;
+        }
+
+        .footer-note {
+            margin-top: 18px;
+            font-size: 0.95rem;
+        }
+
+        @keyframes fade-up {
+            from {
+                opacity: 0;
+                transform: translateY(18px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 980px) {
+            .hero,
+            .overview-grid,
+            .workflow-grid,
+            .prediction-grid,
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .insight-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .section-head {
+                align-items: start;
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .page {
+                width: min(100% - 18px, 100%);
+                padding-top: 16px;
+            }
+
+            .site-nav {
+                flex-direction: column;
+                align-items: start;
+            }
+
+            .hero-copy,
+            .hero-card,
+            .section-card,
+            .cta-card {
+                padding: 22px;
+            }
+
+            .hero h1 {
+                font-size: 2.35rem;
+            }
+
+            .hero-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .metric-row {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <nav class="site-nav">
+            <div class="brand">
+                <span class="brand-mark">SP</span>
+                <span>Student Performance Predictor</span>
+            </div>
+            <div class="nav-links">
+                <a class="pill-link" href="#workflow">Workflow</a>
+                <a class="pill-link" href="#insights">EDA Insights</a>
+                <a class="pill-link" href="#model">Model</a>
+                <a class="primary-link" href="{{ url_for('predict_datapoint') }}">Open Predictor</a>
+            </div>
+        </nav>
+
+        <section class="hero">
+            <div class="hero-copy">
+                <span class="hero-kicker">End-to-End ML Portfolio Project</span>
+                <h1>Predicting student math performance with a production-style workflow.</h1>
+                <p>
+                    This project starts from exploratory data analysis on the Kaggle student
+                    performance dataset, moves through preprocessing and model benchmarking,
+                    and ends with a Flask web app that predicts a student's math score from
+                    demographic and academic profile inputs.
+                </p>
+                <div class="hero-actions">
+                    <a class="primary-link" href="{{ url_for('predict_datapoint') }}">Try the live prediction form</a>
+                    <a class="ghost-link" href="#model">See model details</a>
+                </div>
+                <div class="hero-grid">
+                    {% for stat in project_stats[:3] %}
+                    <div class="stat-chip">
+                        <strong>{{ stat.value }}</strong>
+                        <span>{{ stat.label }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <aside class="hero-card">
+                <h2>Project Snapshot</h2>
+                <p>
+                    Your current saved artifact predicts <strong>{{ model_metrics.target }}</strong>
+                    using five categorical features and two numerical score inputs. The app is
+                    structured for reuse with separate ingestion, transformation, training, and
+                    prediction components under <code>src/</code>.
+                </p>
+                <div class="metric-list">
+                    {% for stat in project_stats[3:] %}
+                    <div class="metric-row">
+                        <span>{{ stat.label }}</span>
+                        <strong>{{ stat.value }}</strong>
+                    </div>
+                    {% endfor %}
+                </div>
+            </aside>
+        </section>
+
+        <section class="section">
+            <div class="section-card">
+                <div class="section-head">
+                    <div>
+                        <span class="section-kicker">At A Glance</span>
+                        <h2>What this project demonstrates</h2>
+                    </div>
+                    <p>
+                        The repository is more than a notebook. It packages the full ML lifecycle:
+                        investigation, preprocessing, model selection, artifact persistence, and a
+                        shareable frontend for prediction.
+                    </p>
+                </div>
+                <div class="overview-grid">
+                    <div class="card overview-card">
+                        <strong>EDA</strong>
+                        <p>
+                            Checked missing values, duplicates, category distributions, outliers,
+                            and feature relationships in
+                            <code>notebook/1 . EDA STUDENT PERFORMANCE .ipynb</code>.
+                        </p>
+                    </div>
+                    <div class="card overview-card">
+                        <strong>Training</strong>
+                        <p>
+                            Benchmarked multiple regression algorithms with grid search and saved
+                            the best model plus the preprocessor for consistent inference.
+                        </p>
+                    </div>
+                    <div class="card overview-card">
+                        <strong>Deployment</strong>
+                        <p>
+                            Served the predictor through Flask templates and added a Vercel-ready
+                            entrypoint so the project can be showcased directly from GitHub.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="workflow">
+            <div class="section-card">
+                <div class="section-head">
+                    <div>
+                        <span class="section-kicker">Workflow</span>
+                        <h2>How the project was built</h2>
+                    </div>
+                    <p>
+                        Each stage maps directly to code in the repository, so visitors can move
+                        from the notebook to reusable Python components and then to the deployed
+                        web interface.
+                    </p>
+                </div>
+                <div class="workflow-grid">
+                    {% for step in workflow_steps %}
+                    <article class="card workflow-card">
+                        <span class="card-index">{{ loop.index }}</span>
+                        <h3>{{ step.title }}</h3>
+                        <p>{{ step.description }}</p>
+                    </article>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="insights">
+            <div class="section-card">
+                <div class="section-head">
+                    <div>
+                        <span class="section-kicker">EDA Highlights</span>
+                        <h2>Insights captured from the notebook analysis</h2>
+                    </div>
+                    <p>
+                        The strongest conclusions from the EDA show both academic relationships
+                        and contextual effects across the student population.
+                    </p>
+                </div>
+                <div class="insight-grid">
+                    {% for insight in eda_insights %}
+                    <article class="card">
+                        <h3>{{ insight.title }}</h3>
+                        <p>{{ insight.description }}</p>
+                    </article>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="model">
+            <div class="section-card">
+                <div class="section-head">
+                    <div>
+                        <span class="section-kicker">Modeling</span>
+                        <h2>Algorithms evaluated and current saved performance</h2>
+                    </div>
+                    <p>
+                        The training pipeline compares a range of regression models and tunes
+                        hyperparameters with <code>GridSearchCV</code> before persisting the best
+                        estimator in <code>artifacts/model.pkl</code>.
+                    </p>
+                </div>
+                <div class="candidate-wrap">
+                    {% for model in model_candidates %}
+                    <span class="candidate">{{ model }}</span>
+                    {% endfor %}
+                </div>
+                <div class="metrics-grid">
+                    <div class="card metric-card">
+                        <strong>{{ model_metrics.best_model }}</strong>
+                        <p class="metric-copy">Best saved model artifact currently powering predictions.</p>
+                    </div>
+                    <div class="card metric-card">
+                        <strong>{{ model_metrics.r2_score }}</strong>
+                        <p class="metric-copy">R2 score measured on the saved held-out test set.</p>
+                    </div>
+                    <div class="card metric-card">
+                        <strong>{{ model_metrics.mae }}</strong>
+                        <p class="metric-copy">Average absolute prediction error in score points.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="section-card">
+                <div class="section-head">
+                    <div>
+                        <span class="section-kicker">Sample Outputs</span>
+                        <h2>Example model predictions</h2>
+                    </div>
+                    <p>
+                        These examples are generated from the saved model artifact and show how
+                        the predictor responds to different reading and writing score profiles.
+                    </p>
+                </div>
+                <div class="prediction-grid">
+                    {% for sample in sample_predictions %}
+                    <article class="prediction-card">
+                        <h3>{{ sample.title }}</h3>
+                        <p class="prediction-copy">{{ sample.summary }}</p>
+                        <div class="prediction-meta">
+                            <span>Reading score: <strong>{{ sample.reading_score }}</strong></span>
+                            <span>Writing score: <strong>{{ sample.writing_score }}</strong></span>
+                            <span class="prediction-value">Predicted math score: <strong>{{ sample.prediction }}</strong></span>
+                        </div>
+                    </article>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+
+        <section class="cta-card">
+            <h2>Ready to showcase the project live?</h2>
+            <p>
+                Open the prediction form, test a few student profiles, and then push the repo to
+                GitHub for Vercel deployment. The current structure already includes the saved
+                artifacts and a compatible Flask entrypoint.
+            </p>
+            <a class="primary-link" href="{{ url_for('predict_datapoint') }}">Launch Prediction Experience</a>
+            <p class="footer-note">
+                Built with Flask, scikit-learn, XGBoost, CatBoost, pandas, NumPy, and notebook-based EDA.
+            </p>
+        </section>
+    </div>
+</body>
+</html>
