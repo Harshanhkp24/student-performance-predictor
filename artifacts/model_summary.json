@@ -1,0 +1,15 @@
+{
+  "best_model_name": "ElasticNet",
+  "best_model_test_r2": 0.8807547369782514,
+  "best_model_train_r2": 0.8743032214588745,
+  "best_model_test_mae": 4.207539994489091,
+  "best_model_params": {
+    "alpha": 0.01,
+    "l1_ratio": 0.9
+  },
+  "engineered_features": [
+    "language_average",
+    "language_total",
+    "language_gap"
+  ]
+}

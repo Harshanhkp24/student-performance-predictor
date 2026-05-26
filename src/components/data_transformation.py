@@ -6,13 +6,42 @@ import pandas as pd
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import OneHotEncoder,StandardScaler
+from sklearn.preprocessing import FunctionTransformer, OneHotEncoder,StandardScaler
 
 from src.exception import CustomException
 from src.logger import logging
 import os
 
 from src.utils import save_object
+
+
+CATEGORICAL_COLUMNS = [
+    "gender",
+    "race_ethnicity",
+    "parental_level_of_education",
+    "lunch",
+    "test_preparation_course",
+]
+BASE_NUMERICAL_COLUMNS = ["reading_score", "writing_score"]
+ENGINEERED_NUMERICAL_COLUMNS = [
+    "language_average",
+    "language_total",
+    "language_gap",
+]
+
+
+def add_eda_features(dataframe):
+    transformed_df = dataframe.copy()
+    transformed_df["language_average"] = (
+        transformed_df["reading_score"] + transformed_df["writing_score"]
+    ) / 2.0
+    transformed_df["language_total"] = (
+        transformed_df["reading_score"] + transformed_df["writing_score"]
+    )
+    transformed_df["language_gap"] = (
+        transformed_df["reading_score"] - transformed_df["writing_score"]
+    ).abs()
+    return transformed_df
 
 
 @dataclass
@@ -29,14 +58,7 @@ class DataTransformation:
         
         '''
         try:
-            numerical_columns = ["writing_score", "reading_score"]
-            categorical_columns = [
-                "gender",
-                "race_ethnicity",
-                "parental_level_of_education",
-                "lunch",
-                "test_preparation_course",
-            ]
+            numerical_columns = BASE_NUMERICAL_COLUMNS + ENGINEERED_NUMERICAL_COLUMNS
 
             num_pipeline= Pipeline(
                 steps=[
@@ -50,26 +72,36 @@ class DataTransformation:
 
                 steps=[
                 ("imputer",SimpleImputer(strategy="most_frequent")),
-                ("one_hot_encoder",OneHotEncoder()),
+                ("one_hot_encoder",OneHotEncoder(handle_unknown="ignore")),
                 ("scaler",StandardScaler(with_mean=False))
                 ]
 
             )
 
-            logging.info(f"Categorical columns: {categorical_columns}")
+            logging.info(f"Categorical columns: {CATEGORICAL_COLUMNS}")
             logging.info(f"Numerical columns: {numerical_columns}")
 
-            preprocessor=ColumnTransformer(
+            preprocessor = ColumnTransformer(
                 [
                 ("num_pipeline",num_pipeline,numerical_columns),
-                ("cat_pipelines",cat_pipeline,categorical_columns)
+                ("cat_pipelines",cat_pipeline,CATEGORICAL_COLUMNS)
 
                 ]
 
 
             )
 
-            return preprocessor
+            model_input_pipeline = Pipeline(
+                steps=[
+                    (
+                        "feature_engineering",
+                        FunctionTransformer(add_eda_features, validate=False),
+                    ),
+                    ("preprocessor", preprocessor),
+                ]
+            )
+
+            return model_input_pipeline
         
         except Exception as e:
             raise CustomException(e,sys)
@@ -87,7 +119,6 @@ class DataTransformation:
             preprocessing_obj=self.get_data_transformer_object()
 
             target_column_name="math_score"
-            numerical_columns = ["writing_score", "reading_score"]
 
             input_feature_train_df=train_df.drop(columns=[target_column_name],axis=1)
             target_feature_train_df=train_df[target_column_name]

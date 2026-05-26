@@ -599,8 +599,8 @@
                     <div class="card overview-card">
                         <strong>Deployment</strong>
                         <p>
-                            Served the predictor through Flask templates and added a Vercel-ready
-                            entrypoint so the project can be showcased directly from GitHub.
+                            Served the predictor through Flask templates and kept the app easy to
+                            run locally with a simple Python entrypoint.
                         </p>
                     </div>
                 </div>
@@ -719,11 +719,10 @@
         </section>
 
         <section class="cta-card">
-            <h2>Ready to showcase the project live?</h2>
+            <h2>Ready to showcase the project locally?</h2>
             <p>
-                Open the prediction form, test a few student profiles, and then push the repo to
-                GitHub for Vercel deployment. The current structure already includes the saved
-                artifacts and a compatible Flask entrypoint.
+                Open the prediction form, test a few student profiles, and use the saved
+                artifacts to demonstrate the full ML workflow from EDA to inference.
             </p>
             <a class="primary-link" href="{{ url_for('predict_datapoint') }}">Launch Prediction Experience</a>
             <p class="footer-note">

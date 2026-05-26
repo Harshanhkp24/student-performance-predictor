@@ -1,0 +1,115 @@
+[
+  {
+    "model_name": "ElasticNet",
+    "train_r2": 0.8743032214588745,
+    "test_r2": 0.8807547369782514,
+    "test_mae": 4.207539994489091,
+    "best_params": {
+      "alpha": 0.01,
+      "l1_ratio": 0.9
+    }
+  },
+  {
+    "model_name": "Lasso",
+    "train_r2": 0.8743134062403899,
+    "test_r2": 0.8806442395064391,
+    "test_mae": 4.208203531358433,
+    "best_params": {
+      "alpha": 0.01
+    }
+  },
+  {
+    "model_name": "Ridge",
+    "train_r2": 0.8743142048444461,
+    "test_r2": 0.880576562605076,
+    "test_mae": 4.210634639081621,
+    "best_params": {
+      "alpha": 1.0
+    }
+  },
+  {
+    "model_name": "Linear Regression",
+    "train_r2": 0.8742380051605035,
+    "test_r2": 0.8803608304005204,
+    "test_mae": 4.207265625,
+    "best_params": {}
+  },
+  {
+    "model_name": "Gradient Boosting",
+    "train_r2": 0.8940368582558037,
+    "test_r2": 0.8774951239719364,
+    "test_mae": 4.245858633468902,
+    "best_params": {
+      "learning_rate": 0.05,
+      "max_depth": 2,
+      "n_estimators": 256,
+      "subsample": 0.8
+    }
+  },
+  {
+    "model_name": "CatBoosting Regressor",
+    "train_r2": 0.888019932905651,
+    "test_r2": 0.8698039474075948,
+    "test_mae": 4.3058936143489435,
+    "best_params": {
+      "depth": 4,
+      "iterations": 300,
+      "learning_rate": 0.03
+    }
+  },
+  {
+    "model_name": "XGBRegressor",
+    "train_r2": 0.8969514932814139,
+    "test_r2": 0.8652440256214775,
+    "test_mae": 4.371135911941528,
+    "best_params": {
+      "learning_rate": 0.05,
+      "max_depth": 3,
+      "n_estimators": 128,
+      "subsample": 0.8
+    }
+  },
+  {
+    "model_name": "Random Forest",
+    "train_r2": 0.9390676368418488,
+    "test_r2": 0.8507320504245321,
+    "test_mae": 4.652560366960315,
+    "best_params": {
+      "max_depth": 8,
+      "min_samples_leaf": 2,
+      "n_estimators": 256
+    }
+  },
+  {
+    "model_name": "AdaBoost Regressor",
+    "train_r2": 0.8589792282433535,
+    "test_r2": 0.8477683724299707,
+    "test_mae": 4.714200019909635,
+    "best_params": {
+      "learning_rate": 0.5,
+      "n_estimators": 256
+    }
+  },
+  {
+    "model_name": "Decision Tree",
+    "train_r2": 0.8718992146667526,
+    "test_r2": 0.8012798226667062,
+    "test_mae": 5.3575,
+    "best_params": {
+      "criterion": "absolute_error",
+      "max_depth": 6,
+      "min_samples_leaf": 4
+    }
+  },
+  {
+    "model_name": "KNeighbors Regressor",
+    "train_r2": 0.9996534669718089,
+    "test_r2": 0.7321085661203163,
+    "test_mae": 6.181686107613672,
+    "best_params": {
+      "n_neighbors": 9,
+      "p": 1,
+      "weights": "distance"
+    }
+  }
+]

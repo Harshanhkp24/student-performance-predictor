@@ -1,3 +1,6 @@
+import json
+import os
+
 from flask import Flask, render_template, request
 
 from src.pipeline.predict_pipeline import CustomData, PredictPipeline
@@ -6,13 +9,39 @@ from src.pipeline.predict_pipeline import CustomData, PredictPipeline
 application = Flask(__name__)
 app = application
 
+DEFAULT_MODEL_SUMMARY = {
+    "best_model_name": "ElasticNet",
+    "best_model_test_r2": 0.8808,
+    "best_model_test_mae": 4.2075,
+    "engineered_features": [
+        "language_average",
+        "language_total",
+        "language_gap",
+    ],
+}
+
+
+def load_model_summary():
+    summary_path = os.path.join("artifacts", "model_summary.json")
+    if not os.path.exists(summary_path):
+        return DEFAULT_MODEL_SUMMARY
+
+    with open(summary_path, "r", encoding="utf-8") as summary_file:
+        return json.load(summary_file)
+
+
+MODEL_SUMMARY = load_model_summary()
+BEST_MODEL_NAME = MODEL_SUMMARY["best_model_name"]
+BEST_MODEL_R2 = f'{MODEL_SUMMARY["best_model_test_r2"]:.4f}'
+BEST_MODEL_MAE = f'{MODEL_SUMMARY["best_model_test_mae"]:.2f}'
+
 PROJECT_STATS = [
     {"value": "1,000", "label": "Student records analyzed"},
-    {"value": "7", "label": "Input features used"},
+    {"value": "7 + 3 engineered", "label": "Raw and derived input features"},
     {"value": "800 / 200", "label": "Train and test split"},
-    {"value": "LinearRegression", "label": "Best saved model"},
-    {"value": "0.8778", "label": "R2 score on test set"},
-    {"value": "4.24", "label": "Mean absolute error"},
+    {"value": BEST_MODEL_NAME, "label": "Best saved model"},
+    {"value": BEST_MODEL_R2, "label": "R2 score on test set"},
+    {"value": BEST_MODEL_MAE, "label": "Mean absolute error"},
 ]
 
 WORKFLOW_STEPS = [
@@ -36,14 +65,16 @@ WORKFLOW_STEPS = [
         "title": "Data Pipeline",
         "description": (
             "Built reusable ingestion and preprocessing components using"
-            " train-test split, imputers, one-hot encoding, and feature scaling."
+            " train-test split, imputers, one-hot encoding, feature scaling,"
+            " and EDA-driven score features such as language average and gap."
         ),
     },
     {
         "title": "Model Benchmarking",
         "description": (
-            "Compared multiple regression algorithms with GridSearchCV and saved"
-            " the strongest trained artifact for inference."
+            "Compared linear, regularized linear, distance-based, bagging,"
+            " boosting, XGBoost, and CatBoost regressors with GridSearchCV"
+            " before saving the strongest artifact."
         ),
     },
     {
@@ -57,7 +88,7 @@ WORKFLOW_STEPS = [
         "title": "Web Deployment",
         "description": (
             "Exposed the predictor through Flask templates so the project can be"
-            " shared as a live portfolio app and deployed on Vercel."
+            " shared as a live portfolio app with a polished interface."
         ),
     },
 ]
@@ -97,6 +128,10 @@ EDA_INSIGHTS = [
 
 MODEL_CANDIDATES = [
     "Linear Regression",
+    "Ridge",
+    "Lasso",
+    "ElasticNet",
+    "KNeighbors Regressor",
     "Random Forest Regressor",
     "Decision Tree Regressor",
     "Gradient Boosting Regressor",
@@ -113,13 +148,17 @@ FEATURE_GROUPS = {
         "lunch",
         "test_preparation_course",
     ],
-    "numerical": ["reading_score", "writing_score"],
+    "numerical": [
+        "reading_score",
+        "writing_score",
+        *MODEL_SUMMARY["engineered_features"],
+    ],
 }
 
 MODEL_METRICS = {
-    "best_model": "LinearRegression",
-    "r2_score": "0.8778",
-    "mae": "4.24",
+    "best_model": BEST_MODEL_NAME,
+    "r2_score": BEST_MODEL_R2,
+    "mae": BEST_MODEL_MAE,
     "target": "math_score",
 }
 
@@ -132,7 +171,7 @@ SAMPLE_PREDICTIONS = [
         ),
         "reading_score": 88,
         "writing_score": 90,
-        "prediction": "78.00",
+        "prediction": "77.26",
     },
     {
         "title": "Steady classroom performer",
@@ -142,7 +181,7 @@ SAMPLE_PREDICTIONS = [
         ),
         "reading_score": 72,
         "writing_score": 70,
-        "prediction": "76.81",
+        "prediction": "76.99",
     },
     {
         "title": "Needs support profile",
@@ -152,7 +191,7 @@ SAMPLE_PREDICTIONS = [
         ),
         "reading_score": 55,
         "writing_score": 58,
-        "prediction": "48.69",
+        "prediction": "48.56",
     },
 ]
 

@@ -1,20 +1,21 @@
 # Student Performance Indicator
 
-An end-to-end machine learning project that predicts a student's **math score** from demographic, academic, and support-related features. The project starts with exploratory data analysis in Jupyter notebooks, moves through a reusable training pipeline, and ends with a Flask web application that serves live predictions.
+End-to-end machine learning project that predicts a student's `math_score` from demographic, academic, and support-related features. The project includes exploratory data analysis, preprocessing, model benchmarking, artifact saving, and a Flask web app for live prediction.
 
-## Project Overview
+## Project Snapshot
 
-This repository showcases the full lifecycle of a supervised machine learning project:
+- Problem type: regression
+- Target column: `math_score`
+- Dataset size: 1000 student records
+- Input features: 5 categorical + 2 numerical
+- Engineered features: `language_average`, `language_total`, `language_gap`
+- Best current model: `ElasticNet`
+- Best test score: `R2 = 0.8808`
+- Best test error: `MAE = 4.2075`
 
-- Problem understanding and dataset familiarization
-- Exploratory Data Analysis (EDA)
-- Data preprocessing and feature engineering
-- Model training and algorithm comparison
-- Artifact saving for reuse in inference
-- Flask-based frontend for live prediction
-- Vercel-ready deployment structure for GitHub showcase
+## Dataset
 
-The project is built around the Student Performance dataset and focuses on estimating `math_score` from:
+The project uses the Student Performance dataset from the Kaggle exam performance benchmark. The raw columns are:
 
 - `gender`
 - `race_ethnicity`
@@ -23,129 +24,211 @@ The project is built around the Student Performance dataset and focuses on estim
 - `test_preparation_course`
 - `reading_score`
 - `writing_score`
+- `math_score`
 
-## What You Have Done
+The notebook checks showed:
 
-### 1. Performed EDA in notebook
+- no missing values
+- no duplicate rows
+- balanced gender distribution
+- strong linear relationships between reading, writing, and math scores
 
-EDA was completed in:
+## EDA Methods Used
 
-- `notebook/1 . EDA STUDENT PERFORMANCE .ipynb`
+The exploratory analysis was done in `notebook/1 . EDA STUDENT PERFORMANCE .ipynb` using the following methods:
 
-In this notebook, you:
+| Method | Purpose | What it showed |
+| --- | --- | --- |
+| Shape and schema checks | Confirm dataset size and columns | 1000 rows, 8 columns |
+| Missing value check | Validate data quality | No missing values |
+| Duplicate check | Make sure records are unique | No duplicates found |
+| Data type review | Confirm numerical vs categorical columns | Data types were consistent |
+| Descriptive statistics | Study mean, min, max, spread | Score ranges looked realistic |
+| Univariate plots | Inspect score distributions | Scores cluster around the 60-80 range |
+| Bivariate plots | Compare score behavior across categories | Lunch and test prep matter |
+| Multivariate plots | Study subject relationships together | Reading and writing track math closely |
+| Correlation heatmap | Quantify numeric relationships | Reading and writing are strongest signals |
+| Feature engineering checks | Create extra score features | Average and gap features are useful for modeling |
 
-- Imported the dataset and inspected its structure
-- Verified the dataset shape: **1000 rows and 8 columns**
-- Checked missing values and found **no missing data**
-- Checked duplicate rows and found **no duplicates**
-- Reviewed data types and unique values
-- Analyzed descriptive statistics for the score columns
-- Added total and average score views for deeper understanding
-- Created univariate, bivariate, and multivariate visualizations
-- Compared performance across gender, ethnicity, lunch type, parental education, and test preparation
-- Used pairplots and score relationships to understand correlation between subject scores
+## EDA Conclusions
 
-### 2. Identified key EDA insights
+The notebook conclusions translate directly into the final pipeline and modeling choices:
 
-Important insights recorded in the notebook include:
+- Reading and writing scores are the strongest numeric predictors for math score.
+- Students with standard lunch generally perform better than students with free or reduced lunch.
+- Students who completed the test preparation course tend to score higher.
+- Female students show stronger overall performance on average.
+- Male students tend to score a bit better in math specifically.
+- Group E tends to perform best, while Group A and Group B trend lower.
+- A simple linear pattern already explains most of the signal in this dataset, which is why regularized linear models perform very well.
 
-- Reading, writing, and math scores move in a strongly linear way
-- Students with **standard lunch** tend to perform better than students with **free/reduced lunch**
-- Female students show stronger overall performance on average
-- Male students tend to score better in math on average
-- Students who completed the **test preparation course** generally score better
-- Group E students tend to perform best, while Group A students tend to perform lower
-- Reading and writing scores are very useful predictors for math score
+## EDA Graphs
 
-### 3. Built a modular ML pipeline
+These figures are generated from the dataset and included in the repo for the README.
 
-The codebase is organized into reusable components under `src/`:
+![Score distributions](assets/eda_score_distributions.png)
 
-- `src/components/data_ingestion.py`
-  - Reads the CSV dataset
-  - Saves raw data to `artifacts/data.csv`
-  - Splits data into train and test sets
-  - Saves `artifacts/train.csv` and `artifacts/test.csv`
+![Category boxplots](assets/eda_category_boxplots.png)
 
-- `src/components/data_transformation.py`
-  - Separates categorical and numerical features
-  - Uses `ColumnTransformer` for preprocessing
-  - Numerical pipeline:
-    - `SimpleImputer(strategy="median")`
-    - `StandardScaler()`
-  - Categorical pipeline:
-    - `SimpleImputer(strategy="most_frequent")`
-    - `OneHotEncoder()`
-    - `StandardScaler(with_mean=False)`
-  - Saves the fitted preprocessor to `artifacts/preprocessor.pkl`
+![Correlation heatmap](assets/eda_correlation_heatmap.png)
 
-- `src/components/model_trainer.py`
-  - Trains and compares multiple regression models
-  - Tunes models using `GridSearchCV`
-  - Saves the best model to `artifacts/model.pkl`
+## Data Processing
 
-- `src/pipeline/predict_pipeline.py`
-  - Loads the saved model and preprocessor
-  - Applies preprocessing to incoming data
-  - Returns a math score prediction
+The preprocessing pipeline lives in `src/components/data_transformation.py` and does the following:
 
-### 4. Trained multiple regression models
+- applies EDA-driven feature engineering
+- creates:
+  - `language_average`
+  - `language_total`
+  - `language_gap`
+- imputes numerical values with the median
+- imputes categorical values with the most frequent category
+- one-hot encodes categorical columns
+- scales numerical and encoded features
 
-The training pipeline compares the following algorithms:
+This preprocessing pipeline is saved to `artifacts/preprocessor.pkl` and reused at prediction time so training and inference stay consistent.
 
-- Linear Regression
-- Random Forest Regressor
-- Decision Tree Regressor
-- Gradient Boosting Regressor
-- XGBRegressor
-- CatBoost Regressor
-- AdaBoost Regressor
+## Model Benchmarking
 
-## Current Saved Model Performance
+The training pipeline compares several regression models using `GridSearchCV`.
 
-The currently saved artifact in `artifacts/model.pkl` is:
+| Model | Best Params | Test R2 | Test MAE | Sample Prediction |
+| --- | --- | ---: | ---: | ---: |
+| ElasticNet | `alpha=0.01, l1_ratio=0.9` | 0.8808 | 4.2075 | 77.26 |
+| Lasso | `alpha=0.01` | 0.8806 | 4.2082 | 77.25 |
+| Ridge | `alpha=1.0` | 0.8806 | 4.2106 | 77.21 |
+| Linear Regression | `default` | 0.8804 | 4.2073 | 77.38 |
+| Gradient Boosting | `learning_rate=0.05, max_depth=2, n_estimators=256, subsample=0.8` | 0.8775 | 4.2459 | 81.26 |
+| CatBoosting Regressor | `depth=4, iterations=300, learning_rate=0.03` | 0.8698 | 4.3059 | 80.30 |
+| XGBRegressor | `learning_rate=0.05, max_depth=3, n_estimators=128, subsample=0.8` | 0.8652 | 4.3711 | 82.02 |
+| Random Forest | `max_depth=8, min_samples_leaf=2, n_estimators=256` | 0.8507 | 4.6526 | 78.24 |
+| AdaBoost Regressor | `learning_rate=0.5, n_estimators=256` | 0.8478 | 4.7142 | 81.33 |
+| Decision Tree | `criterion=absolute_error, max_depth=6, min_samples_leaf=4` | 0.8013 | 5.3575 | 79.00 |
+| KNeighbors Regressor | `n_neighbors=9, p=1, weights=distance` | 0.7321 | 6.1817 | 85.26 |
 
-- **Best saved model:** `LinearRegression`
-- **R2 score on `artifacts/test.csv`:** `0.8778`
-- **Mean Absolute Error:** `4.2425`
+Notes:
 
-This means the model explains a strong portion of the variation in math scores and is usually off by about **4.24 points** on average on the saved test split.
+- The `Sample Prediction` column uses one representative student profile:
+  - female
+  - group C
+  - bachelor's degree
+  - standard lunch
+  - completed test preparation course
+  - reading score = 88
+  - writing score = 90
+- The sample prediction does not mean the model is more accurate. Use `Test R2` and `Test MAE` for ranking.
 
-## Sample Model Predictions
+## Model Comparison Graphs
 
-### A. Example predictions from the saved model
+These graphs compare the models by accuracy and error.
 
-These are sample profiles passed through the saved artifact:
+![R2 comparison](assets/model_r2_comparison.png)
 
-| Scenario | Reading Score | Writing Score | Predicted Math Score |
-| --- | ---: | ---: | ---: |
-| Prepared high performer | 88 | 90 | 78.00 |
-| Steady classroom performer | 72 | 70 | 76.81 |
-| Needs support profile | 55 | 58 | 48.69 |
+![MAE comparison](assets/model_mae_comparison.png)
 
-### B. Sample held-out test examples
+![Representative prediction comparison](assets/model_prediction_comparison.png)
 
-These examples come from `artifacts/test.csv` and compare actual vs predicted values:
+## Representative Prediction Table
 
-| Profile Summary | Reading | Writing | Actual Math | Predicted Math | Abs Error |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| Female, Group D, associate's degree, standard lunch, no prep | 95 | 89 | 82.00 | 82.00 | 0.00 |
-| Male, Group E, some college, standard lunch, no prep | 57 | 52 | 66.00 | 65.69 | 0.31 |
-| Female, Group B, associate's degree, free/reduced lunch, no prep | 61 | 55 | 46.00 | 46.62 | 0.62 |
+The raw sample predictions used in the chart are also saved in `assets/model_sample_predictions.csv`.
 
-## Tech Stack And Libraries Used
+| Model | Prediction |
+| --- | ---: |
+| KNeighbors Regressor | 85.26 |
+| XGBRegressor | 82.02 |
+| AdaBoost Regressor | 81.33 |
+| Gradient Boosting | 81.26 |
+| CatBoosting Regressor | 80.30 |
+| Decision Tree | 79.00 |
+| Random Forest | 78.24 |
+| Linear Regression | 77.38 |
+| ElasticNet | 77.26 |
+| Lasso | 77.25 |
+| Ridge | 77.21 |
 
-- Python
-- Flask
-- pandas
-- NumPy
-- scikit-learn
-- XGBoost
-- CatBoost
-- dill / pickle for artifact persistence
-- Matplotlib
-- Seaborn
-- Jupyter Notebook
+## Flask App
+
+The web app is powered by Flask and uses these main files:
+
+- `application.py` for the Flask routes
+- `templates/index.html` for the landing page
+- `templates/home.html` for the prediction form
+- `src/pipeline/predict_pipeline.py` for inference
+
+How it works:
+
+1. The user opens the landing page.
+2. The user clicks into the prediction form.
+3. The form data is wrapped in `CustomData`.
+4. The saved preprocessor transforms the input.
+5. The saved model predicts `math_score`.
+6. The result is displayed in the browser.
+
+## Run Locally
+
+### 1. Create a virtual environment
+
+If you do not already have an environment, create one from the project root:
+
+```powershell
+python -m venv .venv
+```
+
+### 2. Activate the environment
+
+On PowerShell:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+
+If PowerShell blocks activation, run:
+
+```powershell
+Set-ExecutionPolicy -Scope Process RemoteSigned
+.\.venv\Scripts\Activate.ps1
+```
+
+### 3. Install dependencies
+
+```powershell
+pip install -r requirements.txt
+```
+
+### 4. Start the Flask app
+
+```powershell
+python application.py
+```
+
+### 5. Open the app in your browser
+
+```text
+http://127.0.0.1:5000/
+```
+
+The prediction form is available at:
+
+```text
+http://127.0.0.1:5000/predictdata
+```
+
+## Optional Retraining
+
+If you want to regenerate the artifacts after changing the pipeline, run:
+
+```powershell
+python src/components/data_ingestion.py
+```
+
+That will rebuild:
+
+- `artifacts/train.csv`
+- `artifacts/test.csv`
+- `artifacts/preprocessor.pkl`
+- `artifacts/model.pkl`
+- `artifacts/model_report.json`
+- `artifacts/model_summary.json`
 
 ## Project Structure
 
@@ -161,6 +244,15 @@ mlproject/
 |   |-- test.csv
 |   |-- preprocessor.pkl
 |   |-- model.pkl
+|   |-- model_report.json
+|   |-- model_summary.json
+|-- assets/
+|   |-- eda_score_distributions.png
+|   |-- eda_category_boxplots.png
+|   |-- eda_correlation_heatmap.png
+|   |-- model_r2_comparison.png
+|   |-- model_mae_comparison.png
+|   |-- model_prediction_comparison.png
 |-- notebook/
 |   |-- 1 . EDA STUDENT PERFORMANCE .ipynb
 |   |-- 2. MODEL TRAINING.ipynb
@@ -181,165 +273,23 @@ mlproject/
 |   |-- home.html
 ```
 
-## Frontend And Demo Experience
+## Libraries Used
 
-The frontend now includes:
+- Python
+- Flask
+- pandas
+- NumPy
+- scikit-learn
+- XGBoost
+- CatBoost
+- Matplotlib
+- Seaborn
+- pickle
+- Jupyter Notebook
 
-- A full landing page describing the project story
-- EDA highlights and workflow explanation
-- Saved model metrics
-- Sample prediction cards
-- A polished prediction form UI
-- A prediction result panel with performance band messaging
+## Key Takeaways
 
-This makes the repository much stronger as a **GitHub portfolio project** rather than only a training notebook or a basic HTML form.
-
-## How The Prediction App Works
-
-### Route: `/`
-
-The landing page explains:
-
-- What the project does
-- What steps were followed
-- Which models were compared
-- What insights came from EDA
-- What performance the current model achieved
-
-### Route: `/predictdata`
-
-The prediction page:
-
-1. Takes user input from the form
-2. Builds a single-row dataframe using `CustomData`
-3. Loads `artifacts/preprocessor.pkl`
-4. Loads `artifacts/model.pkl`
-5. Applies preprocessing
-6. Predicts the `math_score`
-7. Displays the result in the browser
-
-## Run The Project Locally
-
-### 1. Create and activate your environment
-
-On Windows:
-
-```powershell
-python -m venv venv
-venv\Scripts\activate
-```
-
-### 2. Install dependencies
-
-```powershell
-pip install -r requirements.txt
-```
-
-### 3. Run the Flask app
-
-```powershell
-python application.py
-```
-
-Then open:
-
-```text
-http://127.0.0.1:5000/
-```
-
-## Re-Train The Pipeline
-
-To regenerate the train/test splits, preprocessor, and model artifact:
-
-```powershell
-python src/components/data_ingestion.py
-```
-
-That script:
-
-- Reads `notebook/data/stud.csv`
-- Splits the data
-- Applies preprocessing
-- Trains the selected models
-- Saves the updated artifacts
-
-## Deploy On Vercel
-
-This repo is now structured to be Vercel-friendly for Flask deployment.
-
-### What was updated for deployment
-
-- Added a root `app.py` entrypoint for Vercel
-- Kept the Flask `app` instance importable
-- Preserved template rendering from the repository root
-- Kept saved artifacts inside the repo so the deployed app can run inference immediately
-
-### Deployment steps
-
-#### Option 1: Deploy from GitHub
-
-1. Push this repository to GitHub
-2. Go to Vercel and import the GitHub repository
-3. Let Vercel detect the project automatically
-4. Deploy
-
-#### Option 2: Deploy from the Vercel CLI
-
-```powershell
-npm i -g vercel
-vercel
-```
-
-For production deployment:
-
-```powershell
-vercel --prod
-```
-
-### Important deployment note
-
-The live predictor depends on:
-
-- `artifacts/model.pkl`
-- `artifacts/preprocessor.pkl`
-
-If these files are missing from the deployed repository, prediction will fail. Keep them committed if you want the demo to work immediately after deployment.
-
-## Improvements Made While Polishing This Project
-
-During this update, the project was improved by:
-
-- Fixing the swapped reading and writing score mapping in the Flask form flow
-- Aligning the training and inference preprocessor filename to `preprocessor.pkl`
-- Removing inference debug prints from the prediction pipeline
-- Making dataset path loading more portable across environments
-- Improving the frontend from basic HTML into a complete ML showcase
-- Adding a Vercel-compatible app entrypoint
-- Writing a portfolio-quality README
-
-## Future Improvements
-
-- Add model evaluation plots and screenshots to the README
-- Add unit tests for preprocessing and prediction routes
-- Add Docker support
-- Add CI checks for linting and smoke tests
-- Show feature importance or coefficient interpretation
-- Track experiments with MLflow or Weights & Biases
-
-## Final Summary
-
-You have already completed the core ML work:
-
-- EDA on student performance data
-- Data preprocessing
-- Model training and comparison
-- Artifact generation
-- Prediction pipeline creation
-
-This update turns that work into a **complete, presentable ML project** with:
-
-- Better documentation
-- Better frontend
-- Better inference flow
-- GitHub-ready structure
-- Vercel-ready deployment path
+- The notebook analysis gave clear intuition about the important features.
+- The pipeline now uses those insights directly through engineered features.
+- Regularized linear models perform best on this dataset.
+- The Flask app makes the project easy to demonstrate locally and on GitHub.
