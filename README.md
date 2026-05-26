@@ -24,7 +24,7 @@ The project is built around the Student Performance dataset and focuses on estim
 - `reading_score`
 - `writing_score`
 
-## What You Have Done
+## What Have we Done
 
 ### 1. Performed EDA in notebook
 
