@@ -2,6 +2,8 @@
 
 End-to-end machine learning project that predicts a student's `math_score` from demographic, academic, and support-related features. The project includes exploratory data analysis, preprocessing, model benchmarking, artifact saving, and a Flask web app for live prediction.
 
+**Live app:** [student-performance-predictor-xjr0.onrender.com](https://student-performance-predictor-xjr0.onrender.com)
+
 ## Project Snapshot
 
 - Problem type: regression
